@@ -17,11 +17,11 @@ import dspy
 # Simple Q&A signature
 qa_sig = make_sig("question", "answer")
 
-# With system prompt
+# Easy syntax for multiple fields, system prompt, and types/descriptions
 medical_qa = make_sig(
-    "question", 
-    "answer", 
-    "You are a medical expert assistant"
+    inputs=["question", "context; Background information"],
+    outputs=["answer", "confidence: float; Confidence score from 0-1"], 
+    system="You are a world-class medical expert"
 )
 
 # Use with DSPy modules
@@ -29,38 +29,47 @@ qa_module = dspy.Predict(qa_sig)
 medical_expert = dspy.ChainOfThought(medical_qa)
 ```
 
-## Features
+## Comparison with Vanilla DSPy
 
-- **Minimal syntax** - Start with just `make_sig("input", "output")`
-- **Progressive complexity** - Add types and descriptions only when needed
-- **Flexible formats** - Strings, lists, or tuples - your choice
-- **Type safety** - Full support for Python type hints
-- **DSPy compatible** - Creates standard DSPy signatures
-
-## Examples
-
-### Simple Single Input/Output
-
+Instead of:
 ```python
-# Just field names (defaults to str type)
-sig = make_sig("question", "answer")
+# Vanilla DSPy
+import dspy
+dspy.configure(lm=dspy.LM('openai/gpt-4o-mini'))
+
+class JokeSignature(dspy.Signature):
+    """You are a scrappy comedian filming your first Netflix special"""
+    topic: str = dspy.InputField()
+    style: str | None = dspy.InputField(description="Speaking style")
+    setup: str = dspy.OutputField()
+    punchline: str = dspy.OutputField()
+    rating: float = dspy.OutputField(description="Your own rating of the joke from 1-10")
 ```
 
-### Multiple Fields
-
+Write:
 ```python
-# List format - the way to specify multiple fields
-sig = make_sig(
-    inputs=["query", "context"],
-    outputs=["answer", "confidence: float"]
+# With ergodspy
+from ergodspy import make_sig
+
+JokeSignature = make_sig(
+    inputs=["topic", "style: str; Speaking style"],
+    outputs=["setup", "punchline", "rating: float; Your own rating of the joke from 1-10"],
+    system="You are a scrappy comedian filming your first Netflix special"
 )
-
-# Single string = single field (not comma-separated!)
-sig = make_sig("question", "answer")  # One input, one output
 ```
 
-### With Types and Descriptions
+## Field Format Reference
 
+Each field can be specified in multiple ways:
+
+1. **Just the name**: `"field_name"` → defaults to `str` type
+2. **With type**: `"field_name: type"` → e.g., `"count: int"`, `"tags: list[str]"`
+3. **With type and description**: `"field_name: type; description"` → e.g., `"query: str; The user's question"`
+4. **Tuple with type**: `("field_name", type)` → e.g., `("embedding", list[float])`
+5. **Tuple with description**: `("field_name", "description")` → e.g., `("query", "What to search for")`
+6. **Full tuple**: `("field_name", type, "description")` → e.g., `("limit", int, "Max items to return")`
+
+Full optionality:
 ```python
 # Using semicolon to separate type and description
 sig = make_sig(
@@ -76,66 +85,6 @@ sig = make_sig(
         "explanation: str; Why these results?"
     ],
     system="You are a helpful search assistant"
-)
-```
-
-### Using with DSPy
-
-```python
-import dspy
-from ergodspy import make_sig
-
-# Configure DSPy
-dspy.configure(lm=dspy.LM('openai/gpt-4o-mini'))
-
-# Create a signature
-joke_sig = make_sig(
-    inputs=["topic", "audience: str; Who is this joke for?"],
-    outputs=["setup", "punchline", "rating: float; Score from 1-10"],
-    system="You are a comedian"
-)
-
-# Use with any DSPy module
-joke_maker = dspy.ChainOfThought(joke_sig)
-result = joke_maker(topic="programming", audience="developers")
-print(f"{result.setup}\n{result.punchline}")
-```
-
-## Field Format Reference
-
-Each field can be specified in multiple ways:
-
-1. **Just the name**: `"field_name"` → defaults to `str` type
-2. **With type**: `"field_name: type"` → e.g., `"count: int"`, `"tags: list[str]"`
-3. **With type and description**: `"field_name: type; description"` → e.g., `"query: str; The user's question"`
-4. **Tuple with type**: `("field_name", type)` → e.g., `("embedding", list[float])`
-5. **Tuple with description**: `("field_name", "description")` → e.g., `("query", "What to search for")`
-6. **Full tuple**: `("field_name", type, "description")` → e.g., `("limit", int, "Max items to return")`
-
-## Comparison with Vanilla DSPy
-
-Instead of:
-```python
-# Vanilla DSPy
-import dspy
-
-class QASignature(dspy.Signature):
-    """You are a helpful assistant"""
-    question: str = dspy.InputField()
-    context: str = dspy.InputField(description="Background information")
-    answer: str = dspy.OutputField()
-    confidence: float = dspy.OutputField(description="Confidence score")
-```
-
-Write:
-```python
-# With ergodspy
-from ergodspy import make_sig
-
-sig = make_sig(
-    inputs=["question", "context: str; Background information"],
-    outputs=["answer", "confidence: float; Confidence score"],
-    system="You are a helpful assistant"
 )
 ```
 
