@@ -49,17 +49,14 @@ sig = make_sig("question", "answer")
 ### Multiple Fields
 
 ```python
-# String format with comma separation
-sig = make_sig(
-    "query, context", 
-    "answer, confidence: float"
-)
-
-# List format for clarity
+# List format - the way to specify multiple fields
 sig = make_sig(
     inputs=["query", "context"],
     outputs=["answer", "confidence: float"]
 )
+
+# Single string = single field (not comma-separated!)
+sig = make_sig("question", "answer")  # One input, one output
 ```
 
 ### With Types and Descriptions

@@ -2,6 +2,14 @@
 
 All notable changes to ergodspy will be documented in this file.
 
+## [0.1.2] - 2025-01-27
+
+### Fixed
+- Removed unintended comma-splitting behavior for string inputs
+  - `make_sig("query", "answer")` creates one input and one output field (as intended)
+  - Multiple fields must use list syntax: `make_sig(["query", "context"], ["answer"])`
+- Updated documentation to clarify string vs list behavior
+
 ## [0.1.1] - 2025-01-27
 
 ### Added

@@ -18,11 +18,11 @@ def test_basic_signatures():
     assert sig2.__doc__ == "You are helpful"
     print("✓ Test 2: System prompt")
     
-    # Test 3: Multiple fields as string
-    sig3 = make_sig("a, b, c", "x, y")
+    # Test 3: Multiple fields as list
+    sig3 = make_sig(["a", "b", "c"], ["x", "y"])
     assert 'a' in sig3.input_fields and 'b' in sig3.input_fields and 'c' in sig3.input_fields
     assert 'x' in sig3.output_fields and 'y' in sig3.output_fields
-    print("✓ Test 3: Multiple fields string")
+    print("✓ Test 3: Multiple fields as list")
     
     # Test 4: With types
     sig4 = make_sig(

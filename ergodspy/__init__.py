@@ -3,7 +3,7 @@
 Write DSPy signatures with minimal boilerplate and maximum clarity.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import re
 from typing import Any, Union, List, Type
@@ -35,7 +35,7 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
         # With system prompt
         make_sig("question", "answer", "You are a helpful assistant")
         
-        # Multiple fields with types and descriptions
+        # Multiple fields - use a list
         make_sig(
             inputs=["topic", "tags: list[str]", "query: str; The user's question"],
             outputs=["joke", "confidence: float; Confidence score 0-1"]
@@ -62,11 +62,8 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
     # Normalize inputs and outputs to lists
     def normalize_to_list(field_spec):
         if isinstance(field_spec, str):
-            # Handle comma-separated fields
-            if ',' in field_spec:
-                return [f.strip() for f in field_spec.split(',')]
-            else:
-                return [field_spec]
+            # Single string = single field
+            return [field_spec]
         return field_spec
     
     inputs = normalize_to_list(inputs)
