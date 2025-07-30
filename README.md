@@ -65,17 +65,18 @@ sig = make_sig(
 ### With Types and Descriptions
 
 ```python
+# Using semicolon to separate type and description
 sig = make_sig(
     inputs=[
-        "topic",                           # Just name (str type)
-        "tags: list[str]",                 # With type annotation
-        "query: 'What to ask about?'",     # With description
-        ("limit", int, "Max results")      # Tuple format
+        "topic",                               # Just name (str type)
+        "tags: list[str]",                     # With type annotation
+        "query: str; What to ask about?",      # Type and description
+        ("limit", int, "Max results")          # Tuple format
     ],
     outputs=[
         "results: list[dict]",
         ("score", float, "Relevance score 0-1"),
-        "explanation: 'Why these results?'"
+        "explanation: str; Why these results?"
     ],
     system="You are a helpful search assistant"
 )
@@ -92,8 +93,8 @@ dspy.configure(lm=dspy.LM('openai/gpt-4o-mini'))
 
 # Create a signature
 joke_sig = make_sig(
-    inputs=["topic", "audience: 'Who is this for?'"],
-    outputs=["setup", "punchline", "rating: float"],
+    inputs=["topic", "audience: str; Who is this joke for?"],
+    outputs=["setup", "punchline", "rating: float; Score from 1-10"],
     system="You are a comedian"
 )
 
@@ -109,7 +110,7 @@ Each field can be specified in multiple ways:
 
 1. **Just the name**: `"field_name"` → defaults to `str` type
 2. **With type**: `"field_name: type"` → e.g., `"count: int"`, `"tags: list[str]"`
-3. **With description**: `"field_name: 'description'"` → e.g., `"query: 'The user question'"`
+3. **With type and description**: `"field_name: type; description"` → e.g., `"query: str; The user's question"`
 4. **Tuple with type**: `("field_name", type)` → e.g., `("embedding", list[float])`
 5. **Tuple with description**: `("field_name", "description")` → e.g., `("query", "What to search for")`
 6. **Full tuple**: `("field_name", type, "description")` → e.g., `("limit", int, "Max items to return")`
@@ -135,8 +136,8 @@ Write:
 from ergodspy import make_sig
 
 sig = make_sig(
-    inputs=["question", "context: 'Background information'"],
-    outputs=["answer", "confidence: float 'Confidence score'"],
+    inputs=["question", "context: str; Background information"],
+    outputs=["answer", "confidence: float; Confidence score"],
     system="You are a helpful assistant"
 )
 ```

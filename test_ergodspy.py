@@ -66,6 +66,20 @@ def test_basic_signatures():
     
     print("✓ Test 7: DSPy compatibility (module creation)")
     
+    # Test 8: Semicolon syntax for type and description
+    sig7 = make_sig(
+        ["query: str; The user's question", "limit: int; Maximum results"],
+        ["results: list[str]; Matching items", "total: int"]
+    )
+    assert sig7.input_fields['query'].description == "The user's question"
+    assert sig7.__annotations__['query'] == str
+    assert sig7.input_fields['limit'].description == "Maximum results"
+    assert sig7.__annotations__['limit'] == int
+    assert sig7.output_fields['results'].description == "Matching items"
+    assert sig7.__annotations__['results'] == list[str]
+    assert sig7.output_fields['total'].description is None
+    print("✓ Test 8: Semicolon syntax")
+    
     print("\n✅ All tests passed!")
 
 if __name__ == "__main__":

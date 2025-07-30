@@ -3,7 +3,7 @@
 Write DSPy signatures with minimal boilerplate and maximum clarity.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import re
 from typing import Any, Union, List, Type
@@ -23,7 +23,7 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
     Field formats:
         - "name" - just the field name (defaults to str type)
         - "name: type" - field with type annotation (e.g. "count: int")
-        - "name: 'description'" - field with description
+        - "name: type; description" - field with type and description
         - ("name", type) - tuple with actual type object
         - ("name", "description") - tuple with description
         - ("name", type, "description") - full specification
@@ -35,10 +35,10 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
         # With system prompt
         make_sig("question", "answer", "You are a helpful assistant")
         
-        # Multiple fields
+        # Multiple fields with types and descriptions
         make_sig(
-            inputs=["topic", "tags: list[str]"],
-            outputs=["joke", "confidence: float"]
+            inputs=["topic", "tags: list[str]", "query: str; The user's question"],
+            outputs=["joke", "confidence: float; Confidence score 0-1"]
         )
         
         # Full complexity
@@ -46,11 +46,11 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
             inputs=[
                 "query",
                 ("context", str, "Background information"),
-                "style: 'casual' or 'formal'"
+                "style: str; Either 'casual' or 'formal'"
             ],
             outputs=[
                 ("answer", str, "The response"),
-                "confidence: float"
+                "confidence: float; How certain the model is"
             ],
             system="You are an expert assistant"
         )
@@ -95,13 +95,31 @@ def make_sig(inputs: Union[str, List[Union[str, tuple]]],
         
         # Handle string formats
         elif isinstance(field, str):
-            # Try to parse "name: type" or "name: 'description'"
-            if ':' in field:
+            # Check if field contains semicolon (type; description format)
+            if ';' in field:
+                # Split on first semicolon
+                type_part, desc = field.split(';', 1)
+                type_part = type_part.strip()
+                desc = desc.strip()
+                
+                # Now parse the type part
+                if ':' in type_part:
+                    name, type_str = type_part.split(':', 1)
+                    name = name.strip()
+                    type_str = type_str.strip()
+                    typ = parse_type_string(type_str)
+                    return name, desc, typ
+                else:
+                    # Just name; description (type defaults to str)
+                    return type_part, desc, str
+            
+            # No semicolon - check for colon (name: type or name: 'description' format)
+            elif ':' in field:
                 name, rest = field.split(':', 1)
                 name = name.strip()
                 rest = rest.strip()
                 
-                # Check if it's a description (quoted string)
+                # Check if it's a quoted description
                 desc_match = re.match(r"^['\"](.+)['\"]$", rest)
                 if desc_match:
                     return name, desc_match.group(1), str
